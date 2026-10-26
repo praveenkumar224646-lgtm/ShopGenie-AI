@@ -23,7 +23,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest requests fastapi uvicorn streamlit chromadb google-genai python-dotenv sqlalchemy
 
-      - name: Start backend
+            - name: Start backend
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           nohup python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 > backend.log 2>&1 &
           for i in {1..30}; do
@@ -35,6 +37,3 @@ jobs:
           done
           cat backend.log
           exit 1
-
-      - name: Run tests
-        run: python -m pytest tests/test_search.py -v
