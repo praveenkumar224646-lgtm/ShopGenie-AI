@@ -23,7 +23,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest requests fastapi uvicorn streamlit chromadb google-genai python-dotenv sqlalchemy
 
-            - name: Start backend
+      - name: Start backend
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
@@ -37,3 +37,6 @@ jobs:
           done
           cat backend.log
           exit 1
+
+      - name: Run tests
+        run: python -m pytest tests/test_search.py -v
