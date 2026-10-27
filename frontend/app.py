@@ -1,6 +1,6 @@
 import streamlit as st
 import requests
-
+from rag.product_comparator import compare_products
 # ============================================================
 # PAGE CONFIG
 # ============================================================
@@ -792,6 +792,8 @@ if st.button("SEARCH PRODUCTS  →"):
 # COMPARE
 # ============================================================
 
+
+
 elif page == "⚖️ Compare Products":
 
     st.markdown(
@@ -805,7 +807,7 @@ elif page == "⚖️ Compare Products":
     )
 
     st.markdown(
-        '<div class="page-description">Place two products side by side and let the comparison engine analyse their differences.</div>',
+        '<div class="page-description">Compare catalog prices and available specifications side by side.</div>',
         unsafe_allow_html=True
     )
 
@@ -816,26 +818,82 @@ elif page == "⚖️ Compare Products":
     with col1:
         product1 = st.text_input(
             "FIRST PRODUCT",
-            placeholder="e.g. MacBook Air M3"
+            placeholder="e.g. ASUS Vivobook 15",
+            key="compare_product1"
         )
 
     with col2:
         product2 = st.text_input(
             "SECOND PRODUCT",
-            placeholder="e.g. Dell XPS 13"
+            placeholder="e.g. HP Victus 15",
+            key="compare_product2"
         )
 
-    if st.button("COMPARE  →", use_container_width=True):
+    if st.button("COMPARE PRODUCTS →", use_container_width=True):
 
-        if product1 and product2:
+        if not product1.strip() or not product2.strip():
+            st.warning("Please enter both product names.")
 
-            st.info(
-                f"Comparison initiated for {product1} and {product2}."
-            )
+        elif product1.strip().lower() == product2.strip().lower():
+            st.warning("Please enter two different products.")
 
         else:
+            with st.spinner("Comparing products..."):
+                result = compare_products(product1, product2)
 
-            st.warning("Please enter both products.")
+            if "error" in result:
+                st.warning(result["error"])
+
+            else:
+                first = result["product1"]
+                second = result["product2"]
+                comparison = result["comparison"]
+
+                st.markdown("### ✦ Product Comparison")
+
+                col1, col2 = st.columns(2)
+
+                for col, product in [
+                    (col1, first),
+                    (col2, second)
+                ]:
+                    with col:
+                        st.markdown("#### " + product["product"])
+
+                        price = product.get("price")
+
+                        if price is not None:
+                            st.metric("Price", f"₹{price:,.0f}")
+                        else:
+                            st.metric("Price", "Not available")
+
+                        st.write("**Category:**", product.get("category", "Unknown"))
+                        st.write("**RAM:**", product.get("ram", "Not available"))
+                        st.write("**Storage:**", product.get("storage", "Not available"))
+                        st.write("**Processor:**", product.get("processor", "Not available"))
+
+                        with st.expander("Product description and source"):
+                            st.write(product.get("description", ""))
+                            st.caption("Source: " + product.get("source", "Unknown"))
+
+                st.markdown("---")
+                st.markdown("### ✦ Final Verdict")
+
+                difference = comparison.get("price_difference")
+
+                if difference is not None:
+                    st.metric("Price Difference", f"₹{difference:,.0f}")
+
+                st.success(
+                    "Cheaper product: " + comparison["cheaper_product"]
+                )
+
+                st.caption(
+                    "Comparison uses recorded catalog data. "
+                    "Unavailable specifications are not assumed."
+                )
+
+
 
 
 # ============================================================
