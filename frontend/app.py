@@ -1010,6 +1010,131 @@ elif page == "⭐ Recommendations":
             st.warning("Please enter your product requirement.")
 
 
+elif page == "📝 Review Summary":
+
+    st.markdown(
+        '<div class="page-eyebrow">04 — PRODUCT INSIGHTS</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        '<div class="page-title">Review Summary</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        '<div class="page-description">'
+        'Understand product feedback at a glance.'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+    st.info(
+        "Demo mode: These are illustrative sample reviews, "
+        "not verified customer reviews."
+    )
+
+    sample_reviews = {
+        "ASUS Vivobook 15": [
+            {
+                "text": "Good performance for daily tasks and college work.",
+                "sentiment": "Positive"
+            },
+            {
+                "text": "Lightweight and easy to carry.",
+                "sentiment": "Positive"
+            },
+            {
+                "text": "Battery life could be better.",
+                "sentiment": "Negative"
+            },
+            {
+                "text": "Good value for the price.",
+                "sentiment": "Positive"
+            }
+        ],
+        "HP Victus": [
+            {
+                "text": "Good gaming performance.",
+                "sentiment": "Positive"
+            },
+            {
+                "text": "The display is good for gaming.",
+                "sentiment": "Positive"
+            },
+            {
+                "text": "Battery drains quickly during gaming.",
+                "sentiment": "Negative"
+            },
+            {
+                "text": "The laptop feels a little heavy.",
+                "sentiment": "Negative"
+            }
+        ]
+    }
+
+    product = st.selectbox(
+        "Select a product",
+        list(sample_reviews.keys())
+    )
+
+    reviews = sample_reviews[product]
+
+    positive = [
+        review["text"]
+        for review in reviews
+        if review["sentiment"] == "Positive"
+    ]
+
+    negative = [
+        review["text"]
+        for review in reviews
+        if review["sentiment"] == "Negative"
+    ]
+
+    st.markdown("### Overview")
+
+    col1, col2, col3 = st.columns(3)
+
+    col1.metric("Sample Reviews", len(reviews))
+    col2.metric("Positive", len(positive))
+    col3.metric("Negative", len(negative))
+
+    st.markdown("### Positive Feedback")
+
+    for item in positive:
+        st.success(item)
+
+    st.markdown("### Areas to Improve")
+
+    for item in negative:
+        st.warning(item)
+
+    st.markdown("### Overall Summary")
+
+    if len(positive) > len(negative):
+        st.write(
+            f"The illustrative feedback for {product} "
+            "is mostly positive, with some areas to improve."
+        )
+    elif len(negative) > len(positive):
+        st.write(
+            f"The illustrative feedback for {product} "
+            "contains more negative than positive comments."
+        )
+    else:
+        st.write(
+            f"The illustrative feedback for {product} "
+            "is evenly split between positive and negative."
+        )
+
+    with st.expander("View all sample reviews"):
+        for index, review in enumerate(reviews, start=1):
+            st.write(
+                f"{index}. {review['text']} "
+                f"— {review['sentiment']}"
+            )
+
 elif page == "📜 Search History":
     st.markdown(
         '<div class="page-title">Search History</div>',
