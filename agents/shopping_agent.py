@@ -82,5 +82,5 @@ def execute_shopping_agent(query):
                 if action == "recommend"
                 else "Search for products matching the user's requirements."
             )
+        }
     }
-}
