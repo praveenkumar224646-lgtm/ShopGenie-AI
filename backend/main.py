@@ -13,10 +13,15 @@ app = FastAPI(
 )
 
 
+
+from pydantic import BaseModel, Field
+
+
 class SearchRequest(BaseModel):
-    query: str
-    budget: float
-    category: str
+    query: str = Field(min_length=1, max_length=300)
+    budget: float = Field(ge=0, allow_inf_nan=False)
+    category: str = Field(min_length=1, max_length=100)
+
 
 
 @app.get("/")
