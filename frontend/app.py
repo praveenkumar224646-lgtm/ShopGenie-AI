@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 from rag.product_comparator import compare_products
+from rag.search_history import save_search, get_search_history, clear_search_history
 # ============================================================
 # PAGE CONFIG
 # ============================================================
@@ -618,6 +619,11 @@ if page == "🏠 Home":
                 if response.status_code == 200:
 
                     result = response.json()
+                    save_search(
+                        query=result["query"],
+                        budget=result["budget"],
+                        category=result["category"]
+                    )
 
                     st.markdown(
                         """
@@ -719,26 +725,24 @@ elif page == "🔍 Product Search":
     )
 
 
-category = st.selectbox(
-    "Category",
-    [
-        "All",
-        "Laptop",
-        "Mobile",
-        "Headphones",
-        "Smartwatch",
-        "Camera",
-        "Other"
-    ],
-    index=0,
-    key="product_category"
-)
 
-query = st.text_input(
-    "What are you looking for?",
-    placeholder="e.g. Best laptop for coding"
-)
-if st.button("SEARCH PRODUCTS  →"):
+    category = st.selectbox(
+        "Category",
+        [
+            "All",
+            "Laptop",
+            "Mobile",
+            "Headphones",
+            "Smartwatch",
+            "Camera",
+            "Other"
+        ],
+        index=0,
+        key="product_category"
+    )
+
+    if st.button("SEARCH PRODUCTS  →"):
+
 
         if query:
 
@@ -759,6 +763,11 @@ if st.button("SEARCH PRODUCTS  →"):
                 if response.status_code == 200:
 
                     result = response.json()
+                    save_search(
+                        query=result["query"],
+                        budget=result["budget"],
+                        category=result["category"]
+                    )
                     st.session_state["recommendation_data"] = result.get("sources", [])
 
                     st.success("Search request processed.")
@@ -965,6 +974,11 @@ elif page == "⭐ Recommendations":
 
                 if response.status_code == 200:
                     result = response.json()
+                    save_search(
+                        query=result["query"],
+                        budget=result["budget"],
+                        category=result["category"]
+                    )
 
                     st.markdown("### ✦ AI Recommendation")
 
@@ -994,3 +1008,31 @@ elif page == "⭐ Recommendations":
 
         else:
             st.warning("Please enter your product requirement.")
+
+
+elif page == "📜 Search History":
+    st.markdown(
+        '<div class="page-title">Search History</div>',
+        unsafe_allow_html=True
+    )
+
+    st.write("Your recent product searches")
+
+    history = get_search_history()
+
+    if history:
+        for item in history:
+            search_id, query, budget, category, searched_at = item
+
+            with st.container(border=True):
+                st.markdown(f"**{query}**")
+                st.write(f"Budget: ₹{budget:,.0f}" if budget is not None else "Budget: Not set")
+                st.write(f"Category: {category or 'All'}")
+                st.caption(searched_at)
+
+        if st.button("CLEAR SEARCH HISTORY"):
+            clear_search_history()
+            st.success("Search history cleared.")
+            st.rerun()
+    else:
+        st.info("No search history yet. Search for a product first.")
