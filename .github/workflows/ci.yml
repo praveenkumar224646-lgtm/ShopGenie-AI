@@ -1,7 +1,5 @@
-```yaml
 name: ShopGenie AI Tests
-
-on:
+"on":
   push:
   pull_request:
 
@@ -45,4 +43,3 @@ jobs:
 
       - name: Run tests
         run: python -m pytest -v
-```
