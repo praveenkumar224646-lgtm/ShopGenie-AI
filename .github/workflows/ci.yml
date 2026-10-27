@@ -23,8 +23,8 @@ jobs:
 
       - name: Seed product database
         run: |
-          python backend/add_laptop_products.py
-          python backend/add_mobile_products.py
+          python -m backend.add_laptop_products
+          python -m backend.add_mobile_products
 
       - name: Start backend
         env:
