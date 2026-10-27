@@ -4,8 +4,7 @@ from pydantic import BaseModel
 
 from rag.retriever import rag_search
 from llm.gemini import generate_response
-
-
+from agents.shopping_agent import run_shopping_agent, execute_shopping_agent
 app = FastAPI(
     title="ShopGenie AI API",
     description="Backend API for ShopGenie AI",
@@ -40,6 +39,8 @@ def health_check():
 
 @app.post("/search")
 def search_product(request: SearchRequest):
+    agent_plan = run_shopping_agent(request.query)
+    agent_result = execute_shopping_agent(request.query)
     rag_result = rag_search(
         query=request.query,
         top_k=10,
@@ -82,17 +83,20 @@ def search_product(request: SearchRequest):
     )
 
     agent_query = f"""
-Recommend products for: {request.query}
-Budget: Rs. {request.budget:.0f}
-Category: {request.category}
+    Selected action: {agent_plan["action"]}
+    Task: {agent_plan["task"]}
 
-{price_note}
+    Recommend products for: {request.query}
+    Budget: Rs. {request.budget:.0f}
+    Category: {request.category}
 
-Use only the supplied catalog. Never invent prices or specifications.
-Explain the best match, alternatives, and final verdict.
+    {price_note}
 
-Catalog:
-{context}
+    Use only the supplied catalog. Never invent prices or specifications.
+    Explain the best match, alternatives, and final verdict.
+
+    Catalog:
+    {context}
 """
 
     try:
@@ -112,6 +116,8 @@ Catalog:
         "query": request.query,
         "budget": request.budget,
         "category": request.category,
+        "agent_action": agent_plan["action"],
+        "agent_result": agent_result["result"],
         "answer": answer,
         "sources": products_to_show
-    }
+}
