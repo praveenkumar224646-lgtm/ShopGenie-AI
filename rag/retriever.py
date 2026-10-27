@@ -3,6 +3,13 @@ from .vector_store import get_vector_store
 
 
 def retrieve_documents(query, top_k=5, category=None):
+    
+    if not isinstance(query, str) or not query.strip():
+        return []
+
+    if not isinstance(top_k, int) or isinstance(top_k, bool) or top_k < 1:
+        return []
+
     collection = get_vector_store()
 
     total_documents = collection.count()
