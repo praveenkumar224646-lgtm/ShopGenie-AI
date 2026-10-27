@@ -17,7 +17,7 @@ def retrieve_documents(query, top_k=5, category=None):
 
     query_args = {
         "query_texts": [query],
-        "n_results": total_documents,
+        "n_results": min(top_k, total_documents),
         "include": ["documents", "metadatas", "distances"]
     }
 
